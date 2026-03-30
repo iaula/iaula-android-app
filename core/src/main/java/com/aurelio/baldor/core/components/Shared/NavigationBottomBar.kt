@@ -4,9 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.EditNote
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -17,12 +14,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.aurelio.baldor.core.R
 
 @Composable
 fun NavigationBottomBar(navController: NavController, currentRoute: String){
@@ -31,9 +31,9 @@ fun NavigationBottomBar(navController: NavController, currentRoute: String){
         tonalElevation = 8.dp
     ) {
         val items = listOf(
-            Triple("Inicio", Icons.Outlined.Home, "home"),
-            Triple("Notas", Icons.Outlined.EditNote, "notas"),
-            Triple("Agenda", Icons.Outlined.CalendarMonth, "agenda"),
+            Triple("Inicio", ImageVector.vectorResource(R.drawable.ic_home), "home"),
+            Triple("Notas", ImageVector.vectorResource(R.drawable.ic_notes), "notas"),
+            Triple("Agenda", ImageVector.vectorResource(R.drawable.ic_calendar), "agenda"),
             Triple("Menú", Icons.Default.Menu, "menu")
         )
 
@@ -54,14 +54,14 @@ fun NavigationBottomBar(navController: NavController, currentRoute: String){
                         Icon(
                             imageVector = icon,
                             contentDescription = label,
-                            tint = if (isSelected) colorResource(com.aurelio.baldor.core.R.color.secondary) else Color.Gray
+                            tint = if (isSelected) colorResource(R.color.secondary) else Color.Gray
                         )
                         Text(
                             text = label,
                             style = TextStyle(
                                 fontSize = 12.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isSelected) colorResource(com.aurelio.baldor.core.R.color.secondary) else Color.Gray
+                                color = if (isSelected) colorResource(R.color.secondary) else Color.Gray
                             )
                         )
                     }
@@ -70,7 +70,7 @@ fun NavigationBottomBar(navController: NavController, currentRoute: String){
                 alwaysShowLabel = false,
                 colors = NavigationBarItemDefaults.colors(indicatorColor = Color.Transparent),
                 modifier = Modifier.background(
-                    if (isSelected) colorResource(com.aurelio.baldor.core.R.color.third) else Color.Transparent
+                    if (isSelected) colorResource(R.color.third) else Color.Transparent
                 )
             )
         }

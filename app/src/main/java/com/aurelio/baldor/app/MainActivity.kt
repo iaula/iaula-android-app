@@ -13,7 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.aurelio.baldor.app.ui.theme.AurelioBaldorAppTheme
 import com.aurelio.baldor.core.data.local.AuthPreferences
-import com.aurelio.baldor.feature_home.HomeScreen
+import com.aurelio.baldor.feature_home.ui.HomeScreen
 import com.aurelio.baldor.feature_login.login.LoginScreen
 
 class MainActivity : ComponentActivity() {

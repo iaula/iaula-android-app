@@ -7,8 +7,16 @@
     <color name="text_primary">#333333</color>
     <color name="text_secondary">#757575</color>
     <color name="text_third">#5A5A5A</color>
+    <color name="text_fourth">#B3B3B3</color>
+    <color name="success_primary">#009951</color>
+    <color name="success_secondary">#CFF7D3</color>
+    <color name="success_third">#F0FFF2</color>
     <color name="warning_primary">#BF6A02</color>
     <color name="warning_secondary">#FFF1C2</color>
     <color name="warning_third">#FFF9E7</color>
     <color name="warning_fourth">#975102</color>
+    <color name="error_primary">#C00F0C</color>
+    <color name="error_secondary">#FDD3D0</color>
+    <color name="error_third">#FFEFED</color>
+    <color name="card_gray">#FAFAFA</color>
 </resources>
