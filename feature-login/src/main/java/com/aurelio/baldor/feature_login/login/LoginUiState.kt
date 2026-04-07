@@ -1,6 +1,7 @@
 package com.aurelio.baldor.feature_login.login
 
 import com.aurelio.baldor.core.data.remote.AuthResponse
+import com.aurelio.baldor.core.data.remote.InstitutionResponse
 
 sealed class LoginResult {
     object Idle : LoginResult()
@@ -12,5 +13,9 @@ sealed class LoginResult {
 data class LoginUiState(
     val usuario: String = "",
     val password: String = "",
-    val result: LoginResult = LoginResult.Idle
+    val result: LoginResult = LoginResult.Idle,
+
+    val institutions: List<InstitutionResponse> = emptyList(),
+    val isLoadingInstitutions: Boolean = false,
+    val selectedInstitution: InstitutionResponse? = null,
 )

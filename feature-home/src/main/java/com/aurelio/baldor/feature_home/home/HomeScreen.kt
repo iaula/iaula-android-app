@@ -1,4 +1,4 @@
-package com.aurelio.baldor.feature_home.ui
+package com.aurelio.baldor.feature_home.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,6 +32,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,30 +54,45 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.aurelio.baldor.core.R
 import com.aurelio.baldor.core.components.Shared.NavigationBottomBar
+import com.aurelio.baldor.feature_home.components.cards.AsistenciaDto
 import com.aurelio.baldor.feature_home.components.cards.AttendanceDelay
 import com.aurelio.baldor.feature_home.components.cards.AttendancePresent
-import com.aurelio.baldor.feature_home.components.cards.ChildrenDto
 import com.aurelio.baldor.feature_home.components.cards.ChildrenCard
+import com.aurelio.baldor.feature_home.components.cards.ChildrenDto
 import com.aurelio.baldor.feature_home.components.cards.CommunicationCard
 import com.aurelio.baldor.feature_home.components.cards.CommunicationDto
 import com.aurelio.baldor.feature_home.components.cards.MenuCard
 import com.aurelio.baldor.feature_home.components.cards.MenuDto
 import com.aurelio.baldor.feature_home.components.cards.NonAttendance
+import org.koin.androidx.compose.koinViewModel
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun HomeScreen(navController: NavController) {
+    val viewModel: HomeViewModel = koinViewModel()
+    val uiState by viewModel.uiState.collectAsState()
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: "home"
 
-    val childrenList = remember {
-        listOf(
-            ChildrenDto("Mateo", "5to Sec", "M", 1),
-            ChildrenDto("Sofía", "2do Sec", "F", 2),
-            ChildrenDto("Emma", "5to Sec", "F", 3)
-        )
+    val childrenList = remember(uiState.hijos) {
+        uiState.hijos.map {
+            ChildrenDto(
+                codigo = it.id_estudiante,
+                name = it.nombres,
+                grade = it.grado_actual ?: "-",
+                gender = it.sexo,
+                id = it.id_persona
+            )
+        }
     }
 
-    var selectedChildId by remember { mutableStateOf(childrenList.first().id) }
+    var selectedChildId by remember(childrenList) {
+        mutableStateOf(
+            childrenList.firstOrNull()?.id ?: 0
+        )
+    }
 
     Scaffold(
         modifier = Modifier
@@ -140,7 +156,10 @@ fun HomeScreen(navController: NavController) {
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
-                                text = "FP",
+                                text = uiState.userData?.username?.split(" ")
+                                    ?.filter { it.isNotEmpty() }
+                                    ?.map { it.first() }
+                                    ?.joinToString("") ?: "",
                                 color = colorResource(R.color.secondary),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 20.sp
@@ -151,7 +170,7 @@ fun HomeScreen(navController: NavController) {
                     Spacer(modifier = Modifier.width(16.dp))
 
                     Text(
-                        text = "¡Hola,\n Familia Perez!",
+                        text = "¡Hola, ${uiState.userData?.username}!",
                         color = White,
                         fontSize = 28.sp,
                         fontWeight = FontWeight.SemiBold,
@@ -171,19 +190,50 @@ fun HomeScreen(navController: NavController) {
                 .padding(16.dp)
         ) {
             // 👨‍👩‍👧‍👦 Sección hijos con scroll horizontal
-            SectionChildren(children = childrenList, selectedId = selectedChildId, onChildSelected = { child -> selectedChildId = child.id})
+            if (uiState.userData?.role == 4) {
+                SectionChildren(
+                    children = childrenList,
+                    selectedId = selectedChildId,
+                    onChildSelected = { child ->
+                        selectedChildId = child.id
+                        viewModel.onChildSelected(child)
+                    })
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // 🕒 Sección Asistencia
-            SectionAttendace(selectedChildId)
+                if (uiState.asistencia != null) {
+                    // 🕒 Sección Asistencia
+                    val parser = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+                    val localeEs = Locale.forLanguageTag("es-ES")
+                    val formatter = SimpleDateFormat("EEEE, dd MMMM yyyy", localeEs)
+                    val fechaUs = parser.parse(uiState.asistencia!!.fecha) ?: ""
+                    val fechaEs = formatter.format(fechaUs)
+                    val fecha = fechaEs.split(" ").joinToString(" ") { palabra ->
+                        if (palabra.length > 3) {
+                            palabra.replaceFirstChar { it.uppercase() }
+                        } else {
+                            palabra
+                        }
+                    }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                    SectionAttendace(
+                        AsistenciaDto(
+                            estado = uiState.asistencia!!.estado ?: "P",
+                            fecha = fecha,
+                            hora_fin = uiState.asistencia!!.horing ?: "-",
+                            hora_inicio = uiState.asistencia!!.horsal ?: "-"
+                        )
+                    )
 
-            // 📊 Sección botones (Notas, Incidencias, Asistencia) con scroll horizontal
-            SectionMenu()
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                // 📊 Sección botones (Notas, Incidencias, Asistencia) con scroll horizontal
+                SectionMenu()
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+            }
 
             // 📌 Sección Comunicados con scroll horizontal
             SectionCommunication(
@@ -207,7 +257,11 @@ fun HomeScreen(navController: NavController) {
 }
 
 @Composable
-fun SectionChildren(children: List<ChildrenDto>, selectedId: Int, onChildSelected: (ChildrenDto) -> Unit) {
+fun SectionChildren(
+    children: List<ChildrenDto>,
+    selectedId: Int,
+    onChildSelected: (ChildrenDto) -> Unit
+) {
     Text(
         "Seleccionar hijo(a)",
         style = MaterialTheme.typography.titleSmall,
@@ -229,17 +283,19 @@ fun SectionChildren(children: List<ChildrenDto>, selectedId: Int, onChildSelecte
 }
 
 @Composable
-fun SectionAttendace(childId: Int) {
+fun SectionAttendace(asistenciaDto: AsistenciaDto) {
     Text(
         "Asistencia", style = MaterialTheme.typography.titleMedium, color = colorResource(
             R.color.secondary
         ), fontWeight = FontWeight.Bold
     )
-    when (childId) {
-        1 -> AttendanceDelay()
-        2 -> AttendancePresent()
-        3 -> NonAttendance()
-        else -> AttendancePresent() // Estado por defecto
+    when (asistenciaDto.estado) {
+        "P" -> AttendancePresent(asistenciaDto)
+        "TI" -> AttendanceDelay(asistenciaDto)
+        "TJ" -> AttendanceDelay(asistenciaDto)
+        "FI" -> NonAttendance(asistenciaDto)
+        "FJ" -> NonAttendance(asistenciaDto)
+        else -> AttendancePresent(asistenciaDto)
     }
 }
 

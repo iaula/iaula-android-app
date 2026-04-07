@@ -33,7 +33,7 @@ import com.aurelio.baldor.core.components.AlertMessage.AlertMessageUi
 import com.aurelio.baldor.core.components.AlertMessage.AlertMessageViewModel
 import com.aurelio.baldor.core.components.AlertMessage.AlertType
 import com.aurelio.baldor.core.components.Loading.LoadingView
-import org.koin.androidx.compose.getViewModel
+import com.aurelio.baldor.core.data.remote.InstitutionResponse
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -46,13 +46,13 @@ fun LoginScreen(
     val viewModel: LoginViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsState()
 
-    //    var institution by remember { mutableStateOf("") }
+    var institution by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var loginMethod by remember { mutableStateOf("DNI") }
 
-    val isLoginEnabled = /*institution.isNotBlank() &&*/
-        uiState.usuario.isNotBlank() &&
-                uiState.password.isNotBlank()
+    val isLoginEnabled = uiState.selectedInstitution != null &&
+            uiState.usuario.isNotBlank() &&
+            uiState.password.isNotBlank()
 
     val scrollState = rememberScrollState()
 
@@ -112,15 +112,16 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // Select institución educativa
-//        val institutions =
-//            listOf("Nombre colegio 1", "Nombre colegio 2", "Nombre colegio 3", "Nombre colegio 4")
-//        InstitutionSelector(
-//            institutions = institutions,
-//            selectedInstitution = institution,
-//            onInstitutionSelected = { institution = it }
-//        )
-//
-//        Spacer(modifier = Modifier.height(20.dp))
+            InstitutionSelector(
+                institutions = uiState.institutions,
+                selectedInstitution = institution,
+                onInstitutionSelected = {
+                    institution = it.nombre
+                    viewModel.onInstitutionSelected(it)
+                }
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Método de ingreso (Toggle Custom)
             Text(
@@ -224,10 +225,7 @@ fun LoginScreen(
 
             // Botón Iniciar sesión (solo activo si los campos están llenos)
             Button(
-                onClick = {
-                    viewModel
-                    viewModel.login()
-                },
+                onClick = { viewModel.login() },
                 enabled = isLoginEnabled,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -290,9 +288,9 @@ fun LoginScreen(
 
 @Composable
 fun InstitutionSelector(
-    institutions: List<String>,
+    institutions: List<InstitutionResponse>,
     selectedInstitution: String,
-    onInstitutionSelected: (String) -> Unit
+    onInstitutionSelected: (InstitutionResponse) -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -330,7 +328,7 @@ fun InstitutionSelector(
             if (searchQuery.isEmpty()) {
                 institutions
             } else {
-                institutions.filter { it.contains(searchQuery, ignoreCase = true) }
+                institutions.filter { it.nombre.contains(searchQuery, ignoreCase = true) }
             }
         }
 
@@ -355,7 +353,7 @@ fun InstitutionSelector(
                     LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
                         items(filteredInstitutions) { institution ->
                             Text(
-                                text = institution,
+                                text = institution.nombre,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {

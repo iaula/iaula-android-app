@@ -23,9 +23,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.aurelio.baldor.core.R
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun NavigationBottomBar(navController: NavController, currentRoute: String){
+
+    val viewModel: NavigationBottomBarViewModel = koinViewModel()
+
     NavigationBar(
         containerColor = White,
         tonalElevation = 8.dp
@@ -42,6 +46,12 @@ fun NavigationBottomBar(navController: NavController, currentRoute: String){
             NavigationBarItem(
                 selected = isSelected,
                 onClick = {
+//                    if(route == "menu"){
+//                        viewModel.logout()
+//                        navController.navigate("login") {
+//                            popUpTo("home") { inclusive = true }
+//                        }
+//                    }
                     if (currentRoute != route) {
                         navController.navigate(route) {
                             launchSingleTop = true

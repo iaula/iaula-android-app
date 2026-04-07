@@ -34,8 +34,15 @@ import com.aurelio.baldor.core.R
 import com.aurelio.baldor.feature_home.components.dialogs.DelayDialog
 import com.aurelio.baldor.feature_home.components.dialogs.NonAttendanceDialog
 
+data class AsistenciaDto(
+    val estado: String,
+    val fecha: String,
+    val hora_inicio: String,
+    val hora_fin: String
+)
+
 @Composable
-fun AttendancePresent(){
+fun AttendancePresent(asistenciaDto: AsistenciaDto) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -60,7 +67,7 @@ fun AttendancePresent(){
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Lunes, 16 Febrero 2026",
+                        text = asistenciaDto.fecha,
                         fontSize = 14.sp,
                         color = colorResource(R.color.text_primary)
                     )
@@ -94,10 +101,14 @@ fun AttendancePresent(){
                             modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Ingreso: 07:00AM", color = colorResource(R.color.text_third), fontSize = 12.sp)
+                        Text(
+                            text = "Ingreso:",
+                            color = colorResource(R.color.text_third),
+                            fontSize = 12.sp
+                        )
                     }
                     Text(
-                        text = "07:00AM",
+                        text = asistenciaDto.hora_inicio.take(5),
                         color = colorResource(R.color.success_primary),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
@@ -115,10 +126,14 @@ fun AttendancePresent(){
                             modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Salida: 03:00PM", color = colorResource(R.color.text_third), fontSize = 12.sp)
+                        Text(
+                            text = "Salida:",
+                            color = colorResource(R.color.text_third),
+                            fontSize = 12.sp
+                        )
                     }
                     Text(
-                        text = "-",
+                        text = asistenciaDto.hora_fin.take(5),
                         color = colorResource(R.color.text_third),
                         fontSize = 12.sp,
                         modifier = Modifier.padding(start = 26.dp)
@@ -130,7 +145,7 @@ fun AttendancePresent(){
 }
 
 @Composable
-fun AttendanceDelay(){
+fun AttendanceDelay(asistenciaDto: AsistenciaDto) {
     var showDialog by remember { mutableStateOf(false) }
 
     Card(
@@ -157,7 +172,7 @@ fun AttendanceDelay(){
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Lunes, 16 Febrero 2026",
+                        text = asistenciaDto.fecha,
                         fontSize = 14.sp,
                         color = colorResource(R.color.text_primary)
                     )
@@ -191,10 +206,14 @@ fun AttendanceDelay(){
                             modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Ingreso: 07:00AM", color = colorResource(R.color.text_third), fontSize = 12.sp)
+                        Text(
+                            text = "Ingreso:",
+                            color = colorResource(R.color.text_third),
+                            fontSize = 12.sp
+                        )
                     }
                     Text(
-                        text = "07:40AM",
+                        text = asistenciaDto.hora_inicio.take(5),
                         color = colorResource(R.color.warning_fourth),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
@@ -212,10 +231,14 @@ fun AttendanceDelay(){
                             modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Salida: 03:00PM", color = colorResource(R.color.text_third), fontSize = 12.sp)
+                        Text(
+                            text = "Salida:",
+                            color = colorResource(R.color.text_third),
+                            fontSize = 12.sp
+                        )
                     }
                     Text(
-                        text = "-",
+                        text = asistenciaDto.hora_fin.take(5),
                         color = colorResource(R.color.text_third),
                         fontSize = 12.sp,
                         modifier = Modifier.padding(start = 26.dp)
@@ -226,34 +249,38 @@ fun AttendanceDelay(){
             Spacer(modifier = Modifier.height(12.dp))
 
             // Fila Inferior: Link de Justificación
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable(){
-                showDialog = true
-            }) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_paper),
-                    contentDescription = null,
-                    tint = colorResource(R.color.warning_primary),
-                    modifier = Modifier.size(14.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Justificar tardanza",
-                    color = colorResource(R.color.warning_primary),
-                    fontWeight = FontWeight.Bold,
-                    textDecoration = TextDecoration.Underline,
-                    fontSize = 12.sp
-                )
+            if (asistenciaDto.estado == "TI") {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable() {
+                        showDialog = true
+                    }) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_paper),
+                        contentDescription = null,
+                        tint = colorResource(R.color.warning_primary),
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Justificar tardanza",
+                        color = colorResource(R.color.warning_primary),
+                        fontWeight = FontWeight.Bold,
+                        textDecoration = TextDecoration.Underline,
+                        fontSize = 12.sp
+                    )
+                }
             }
         }
     }
 
-    if(showDialog){
+    if (showDialog) {
         DelayDialog(onDismiss = { showDialog = false })
     }
 }
 
 @Composable
-fun NonAttendance(){
+fun NonAttendance(asistenciaDto: AsistenciaDto) {
     var showDialog by remember { mutableStateOf(false) }
 
     Card(
@@ -280,7 +307,7 @@ fun NonAttendance(){
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Lunes, 16 Febrero 2026",
+                        text = asistenciaDto.fecha,
                         fontSize = 14.sp,
                         color = colorResource(R.color.text_primary)
                     )
@@ -314,10 +341,14 @@ fun NonAttendance(){
                             modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Ingreso: 07:00AM", color = colorResource(R.color.text_third), fontSize = 12.sp)
+                        Text(
+                            text = "Ingreso:",
+                            color = colorResource(R.color.text_third),
+                            fontSize = 12.sp
+                        )
                     }
                     Text(
-                        text = "-",
+                        text = asistenciaDto.hora_inicio.take( 5),
                         color = colorResource(R.color.text_third),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
@@ -335,10 +366,14 @@ fun NonAttendance(){
                             modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Salida: 03:00PM", color = colorResource(R.color.text_third), fontSize = 12.sp)
+                        Text(
+                            text = "Salida:",
+                            color = colorResource(R.color.text_third),
+                            fontSize = 12.sp
+                        )
                     }
                     Text(
-                        text = "-",
+                        text = asistenciaDto.hora_fin.take( 5),
                         color = colorResource(R.color.text_third),
                         fontSize = 12.sp,
                         modifier = Modifier.padding(start = 26.dp)
@@ -349,28 +384,32 @@ fun NonAttendance(){
             Spacer(modifier = Modifier.height(12.dp))
 
             // Fila Inferior: Link de Justificación
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable(){
-                showDialog = true
-            }) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_paper),
-                    contentDescription = null,
-                    tint = colorResource(R.color.error_primary),
-                    modifier = Modifier.size(14.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Justificar falta",
-                    color = colorResource(R.color.error_primary),
-                    fontWeight = FontWeight.Bold,
-                    textDecoration = TextDecoration.Underline,
-                    fontSize = 12.sp
-                )
+            if (asistenciaDto.estado == "FI") {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable() {
+                        showDialog = true
+                    }) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_paper),
+                        contentDescription = null,
+                        tint = colorResource(R.color.error_primary),
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Justificar falta",
+                        color = colorResource(R.color.error_primary),
+                        fontWeight = FontWeight.Bold,
+                        textDecoration = TextDecoration.Underline,
+                        fontSize = 12.sp
+                    )
+                }
             }
         }
     }
 
-    if(showDialog){
+    if (showDialog) {
         NonAttendanceDialog(onDismiss = { showDialog = false })
     }
 }

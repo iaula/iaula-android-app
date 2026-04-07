@@ -20,10 +20,11 @@ import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.aurelio.baldor.core.R
 
-data class ChildrenDto(val name: String, val grade: String, val gender: String, val id: Int)
+data class ChildrenDto(val codigo: String, val name: String, val grade: String, val gender: String, val id: Int)
 
 @Composable
 fun ChildrenCard(child: ChildrenDto, selected: Boolean){
@@ -54,7 +55,8 @@ fun ChildrenCard(child: ChildrenDto, selected: Boolean){
                 child.name,
                 style = MaterialTheme.typography.bodyMedium,
                 color = colorResource(if(selected) R.color.text_primary else R.color.text_secondary),
-                fontWeight = if(selected) FontWeight.Bold else FontWeight.Normal
+                fontWeight = if(selected) FontWeight.Bold else FontWeight.Normal,
+                textAlign = TextAlign.Center
             )
             Text(
                 child.grade,

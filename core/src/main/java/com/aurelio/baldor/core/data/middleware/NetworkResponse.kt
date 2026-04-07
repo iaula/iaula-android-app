@@ -1,7 +1,7 @@
-package com.aurelio.baldor.core.data.remote
+package com.aurelio.baldor.core.data.middleware
 
 data class NetworkResponse<T>(
-    val success: Boolean,
+    val status: Boolean,
     val message: String,
     val detail: T?,
     val error: String?

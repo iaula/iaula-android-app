@@ -1,9 +1,16 @@
-package com.aurelio.baldor.core.data.remote
+package com.aurelio.baldor.core.data.middleware
 
 import com.aurelio.baldor.core.data.local.AuthPreferences
+import com.aurelio.baldor.core.data.remote.AuthApiService
+import com.aurelio.baldor.core.data.remote.RefreshRequest
+import com.aurelio.baldor.core.di.NetworkConfig.API_KEY
+import com.aurelio.baldor.core.di.NetworkConfig.BASE_URL
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Interceptor
+import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
 
@@ -13,38 +20,32 @@ class AuthInterceptor(
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        val request = chain.request()
+        val originalRequest = chain.request()
+        val path = originalRequest.url.encodedPath
+        var request = originalRequest.newBuilder()
 
-        // No agregar token en /auth/login
-        if (!request.url.encodedPath.contains("/auth/login")) {
-            val token = runBlocking { prefs.authToken.firstOrNull() }
-            token?.let {
-                val newRequest = request.newBuilder()
-                    .addHeader("Authorization", "Bearer $it")
-                    .build()
-                return handleResponse(chain, newRequest)
+        if (!path.contains("/auth/login") && !path.contains("/auth/refresh") && !path.contains("/institucion")) {
+            runBlocking { prefs.authToken.firstOrNull() }?.let {
+                request.addHeader("Authorization", "Bearer $it")
             }
         }
 
-        return handleResponse(chain, request)
+        return handleResponse(chain, request.build())
     }
 
-    private fun handleResponse(chain: Interceptor.Chain, request: okhttp3.Request): Response {
+    private fun handleResponse(chain: Interceptor.Chain, request: Request): Response {
         try {
             val response = chain.proceed(request)
 
-            if (request.url.encodedPath.contains("/auth/login")) {
-                return response
-            }
+            if (response.code == 401 && !request.url.encodedPath.contains("/auth/login")) {
 
-            if (response.code == 401) {
                 val refreshResponse = try {
-                    runBlocking { api.refresh() }
+                    runBlocking { api.refresh(RefreshRequest(prefs.refreshToken.firstOrNull())) }
                 } catch (e: Exception) {
                     null
                 }
 
-                if (refreshResponse != null && refreshResponse.success && refreshResponse.detail != null) {
+                if (refreshResponse != null && refreshResponse.status && refreshResponse.detail != null) {
                     val newToken = refreshResponse.detail.access_token
                     runBlocking { prefs.saveTokens(newToken) }
 
@@ -68,4 +69,4 @@ class AuthInterceptor(
     }
 }
 
-class NoInternetException(message: String): IOException(message)
+class NoInternetException(message: String) : IOException(message)

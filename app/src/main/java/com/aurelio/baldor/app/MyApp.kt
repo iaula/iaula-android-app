@@ -2,6 +2,7 @@ package com.aurelio.baldor.app
 
 import android.app.Application
 import com.aurelio.baldor.core.di.coreModule
+import com.aurelio.baldor.feature_home.homeModule
 import com.aurelio.baldor.feature_login.di.loginModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -14,7 +15,8 @@ class MyApp : Application() {
             modules(
                 listOf(
                     coreModule,
-                    loginModule
+                    loginModule,
+                    homeModule
                 )
             )
         }
