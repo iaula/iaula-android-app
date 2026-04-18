@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aurelio.baldor.core.data.local.AuthPreferences
 import com.aurelio.baldor.core.data.middleware.NetworkResult
+import com.aurelio.baldor.core.data.remote.AsistenciaResponse
 import com.aurelio.baldor.core.domain.model.UserData
 import com.aurelio.baldor.core.domain.usecase.AsistenciaUseCase
 import com.aurelio.baldor.core.domain.usecase.FamiliasUseCase
@@ -75,7 +76,11 @@ class HomeViewModel(
             when (val result =
                 asistenciaUseCase(date_ini = today, date_fin = today, codigo = child.codigo)) {
                 is NetworkResult.Success -> {
-                    _uiState.update { it.copy(asistencia = result.data.firstOrNull()) }
+                    var asistencia = result.data.firstOrNull()
+                    if(asistencia == null){
+                        asistencia = AsistenciaResponse(matriz = 0, entidad = "", codigo = "", fecha = today, horing = "-", horsal = "-", estado = "-", estado_des = "Inasistencia", comentario = "", justificacion = "")
+                    }
+                    _uiState.update { it.copy(asistencia = asistencia) }
                 }
 
                 else -> {

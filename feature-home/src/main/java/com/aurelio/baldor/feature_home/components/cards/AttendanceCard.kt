@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.vectorResource
@@ -40,6 +41,55 @@ data class AsistenciaDto(
     val hora_inicio: String,
     val hora_fin: String
 )
+
+@Composable
+fun WithoutAttendance(asistenciaDto: AsistenciaDto) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = colorResource(R.color.card_gray))
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+        ) {
+            // Fila Superior: Fecha y Etiqueta
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_calendar),
+                        contentDescription = null,
+                        tint = colorResource(R.color.text_primary),
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = asistenciaDto.fecha,
+                        fontSize = 14.sp,
+                        color = colorResource(R.color.text_primary)
+                    )
+                }
+
+                Surface(
+                    color = colorResource(R.color.text_fourth),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "Sin Asistencia",
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = White,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun AttendancePresent(asistenciaDto: AsistenciaDto) {
@@ -109,7 +159,7 @@ fun AttendancePresent(asistenciaDto: AsistenciaDto) {
                     }
                     Text(
                         text = asistenciaDto.hora_inicio.take(5),
-                        color = colorResource(R.color.success_primary),
+                        color = colorResource(if (asistenciaDto.hora_inicio != "-") R.color.success_primary else R.color.text_third),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(start = 26.dp)
@@ -134,7 +184,7 @@ fun AttendancePresent(asistenciaDto: AsistenciaDto) {
                     }
                     Text(
                         text = asistenciaDto.hora_fin.take(5),
-                        color = colorResource(R.color.text_third),
+                        color = colorResource(if (asistenciaDto.hora_fin != "-") R.color.success_primary else R.color.text_third),
                         fontSize = 12.sp,
                         modifier = Modifier.padding(start = 26.dp)
                     )
@@ -214,7 +264,7 @@ fun AttendanceDelay(asistenciaDto: AsistenciaDto) {
                     }
                     Text(
                         text = asistenciaDto.hora_inicio.take(5),
-                        color = colorResource(R.color.warning_fourth),
+                        color = colorResource(if (asistenciaDto.hora_inicio != "-") R.color.warning_fourth else R.color.text_third),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(start = 26.dp)
@@ -239,7 +289,7 @@ fun AttendanceDelay(asistenciaDto: AsistenciaDto) {
                     }
                     Text(
                         text = asistenciaDto.hora_fin.take(5),
-                        color = colorResource(R.color.text_third),
+                        color = colorResource(if (asistenciaDto.hora_fin != "-") R.color.warning_fourth else R.color.text_third),
                         fontSize = 12.sp,
                         modifier = Modifier.padding(start = 26.dp)
                     )
@@ -348,8 +398,8 @@ fun NonAttendance(asistenciaDto: AsistenciaDto) {
                         )
                     }
                     Text(
-                        text = asistenciaDto.hora_inicio.take( 5),
-                        color = colorResource(R.color.text_third),
+                        text = asistenciaDto.hora_inicio.take(5),
+                        color = colorResource(if (asistenciaDto.hora_inicio != "-") R.color.error_primary else R.color.text_third),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(start = 26.dp)
@@ -373,8 +423,8 @@ fun NonAttendance(asistenciaDto: AsistenciaDto) {
                         )
                     }
                     Text(
-                        text = asistenciaDto.hora_fin.take( 5),
-                        color = colorResource(R.color.text_third),
+                        text = asistenciaDto.hora_fin.take(5),
+                        color = colorResource(if (asistenciaDto.hora_fin != "-") R.color.error_primary else R.color.text_third),
                         fontSize = 12.sp,
                         modifier = Modifier.padding(start = 26.dp)
                     )

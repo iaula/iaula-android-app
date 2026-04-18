@@ -47,6 +47,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -64,6 +65,7 @@ import com.aurelio.baldor.feature_home.components.cards.CommunicationDto
 import com.aurelio.baldor.feature_home.components.cards.MenuCard
 import com.aurelio.baldor.feature_home.components.cards.MenuDto
 import com.aurelio.baldor.feature_home.components.cards.NonAttendance
+import com.aurelio.baldor.feature_home.components.cards.WithoutAttendance
 import org.koin.androidx.compose.koinViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -99,58 +101,29 @@ fun HomeScreen(navController: NavController) {
             .fillMaxSize()
             .safeDrawingPadding(),
         topBar = {
-            Column {
-                // Top Bar Section
+            // Top Bar Section
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(colorResource(R.color.secondary))
+                    .padding(vertical = 8.dp, horizontal = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.logo_complete),
+                    contentDescription = "Logo",
+                    modifier = Modifier.size(50.dp)
+                )
+
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(colorResource(R.color.secondary))
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.logo_complete),
-                        contentDescription = "Logo",
-                        modifier = Modifier.size(40.dp)
-                    )
 
-                    Box {
-                        Surface(
-                            modifier = Modifier.size(20.dp),
-                            shape = CircleShape,
-                            color = colorResource(R.color.fourth)
-                        ) {}
-                        Icon(
-                            imageVector = Icons.Outlined.Notifications,
-                            contentDescription = "Notificaciones",
-                            tint = White,
-                            modifier = Modifier
-                                .size(20.dp)
-                                .padding(2.dp),
-                        )
-                        Surface(
-                            color = Color.Red,
-                            shape = CircleShape,
-                            modifier = Modifier
-                                .size(10.dp)
-                                .padding(2.dp)
-                                .align(Alignment.TopEnd)
-                                .border(1.dp, White, CircleShape)
-                        ) {}
-                    }
-                }
-
-                // Welcome section
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(colorResource(R.color.secondary))
-                        .padding(start = 20.dp, end = 16.dp, bottom = 16.dp, top = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
                     Surface(
-                        modifier = Modifier.size(60.dp),
+                        modifier = Modifier.size(25.dp),
                         shape = CircleShape,
                         color = colorResource(R.color.third)
                     ) {
@@ -162,20 +135,47 @@ fun HomeScreen(navController: NavController) {
                                     ?.joinToString("") ?: "",
                                 color = colorResource(R.color.secondary),
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 20.sp
+                                fontSize = 10.sp
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
 
                     Text(
                         text = "¡Hola, ${uiState.userData?.username}!",
                         color = White,
-                        fontSize = 28.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
-                        lineHeight = 32.sp
+                        lineHeight = 14.sp,
+                        textAlign = TextAlign.Center
+
                     )
+                }
+
+                Box {
+                    Surface(
+                        modifier = Modifier.size(20.dp),
+                        shape = CircleShape,
+                        color = colorResource(R.color.fourth)
+                    ) {}
+                    Icon(
+                        imageVector = Icons.Outlined.Notifications,
+                        contentDescription = "Notificaciones",
+                        tint = White,
+                        modifier = Modifier
+                            .size(20.dp)
+                            .padding(2.dp),
+                    )
+                    Surface(
+                        color = Color.Red,
+                        shape = CircleShape,
+                        modifier = Modifier
+                            .size(10.dp)
+                            .padding(2.dp)
+                            .align(Alignment.TopEnd)
+                            .border(1.dp, White, CircleShape)
+                    ) {}
                 }
             }
         },
@@ -220,13 +220,14 @@ fun HomeScreen(navController: NavController) {
                         AsistenciaDto(
                             estado = uiState.asistencia!!.estado ?: "P",
                             fecha = fecha,
-                            hora_fin = uiState.asistencia!!.horing ?: "-",
-                            hora_inicio = uiState.asistencia!!.horsal ?: "-"
+                            hora_inicio = uiState.asistencia!!.horing ?: "-",
+                            hora_fin = uiState.asistencia!!.horsal ?: "-"
                         )
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
                 }
+
 
                 // 📊 Sección botones (Notas, Incidencias, Asistencia) con scroll horizontal
                 SectionMenu()
@@ -295,7 +296,7 @@ fun SectionAttendace(asistenciaDto: AsistenciaDto) {
         "TJ" -> AttendanceDelay(asistenciaDto)
         "FI" -> NonAttendance(asistenciaDto)
         "FJ" -> NonAttendance(asistenciaDto)
-        else -> AttendancePresent(asistenciaDto)
+        else -> WithoutAttendance(asistenciaDto)
     }
 }
 
