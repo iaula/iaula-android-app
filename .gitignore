@@ -1,15 +1,27 @@
+## Directorios del IDE (Ignora todo .idea de golpe)
+.idea/
+
+## Archivos de proyecto y configuración local
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+*.ipr
+*.iws
 local.properties
+
+## Archivos generados y carpetas de compilación
+.gradle/
+build/
+/*/build/
+captures/
+
+## Compilación nativa (C/C++)
+.externalNativeBuild/
+.cxx/
+ndkBuild/
+
+## Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+## Archivos de registro y caché
+*.log
+.shelf/
