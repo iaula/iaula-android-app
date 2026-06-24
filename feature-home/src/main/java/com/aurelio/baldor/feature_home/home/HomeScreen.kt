@@ -1,5 +1,6 @@
 package com.aurelio.baldor.feature_home.home
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,9 +8,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -42,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
@@ -75,6 +79,9 @@ fun HomeScreen(navController: NavController) {
     val viewModel: HomeViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsState()
 
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: "home"
 
@@ -96,163 +103,223 @@ fun HomeScreen(navController: NavController) {
         )
     }
 
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .safeDrawingPadding(),
-        topBar = {
-            // Top Bar Section
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(colorResource(R.color.secondary))
-                    .padding(vertical = 8.dp, horizontal = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.logo_complete),
-                    contentDescription = "Logo",
-                    modifier = Modifier.size(50.dp)
-                )
+    Row(modifier = Modifier.fillMaxSize()) {
+        if (isLandscape) {
+            NavigationBottomBar(navController, currentRoute, isLandscape = true)
+        }
 
+        Scaffold(
+            modifier = Modifier
+                .weight(1f)
+                .safeDrawingPadding(),
+            topBar = {
+                Box(modifier = Modifier.background(colorResource(R.color.secondary))) {
+                    TopBarContent(uiState)
+                }
+            },
+            bottomBar = {
+                if (!isLandscape) {
+                    NavigationBottomBar(navController, currentRoute, isLandscape = false)
+                }
+            }
+        ) { innerPadding ->
+            if (isLandscape) {
                 Row(
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()
+                        .background(White)
                 ) {
-
-                    Surface(
-                        modifier = Modifier.size(25.dp),
-                        shape = CircleShape,
-                        color = colorResource(R.color.third)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = uiState.userData?.username?.split(" ")
-                                    ?.filter { it.isNotEmpty() }
-                                    ?.map { it.first() }
-                                    ?.joinToString("") ?: "",
-                                color = colorResource(R.color.secondary),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 10.sp
+                    if (uiState.userData?.role == 4) {
+                        Column(
+                            modifier = Modifier
+                                .weight(0.25f)
+                                .fillMaxHeight()
+                                .verticalScroll(rememberScrollState())
+                                .padding(16.dp)
+                        ) {
+                            SectionChildren(
+                                children = childrenList,
+                                selectedId = selectedChildId,
+                                isVertical = true,
+                                onChildSelected = { child ->
+                                    selectedChildId = child.id
+                                    viewModel.onChildSelected(child)
+                                }
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Text(
-                        text = "¡Hola, ${uiState.userData?.username}!",
-                        color = White,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        lineHeight = 14.sp,
-                        textAlign = TextAlign.Center
-
-                    )
-                }
-
-                Box {
-                    Surface(
-                        modifier = Modifier.size(20.dp),
-                        shape = CircleShape,
-                        color = colorResource(R.color.fourth)
-                    ) {}
-                    Icon(
-                        imageVector = Icons.Outlined.Notifications,
-                        contentDescription = "Notificaciones",
-                        tint = White,
+                    Column(
                         modifier = Modifier
-                            .size(20.dp)
-                            .padding(2.dp),
-                    )
-                    Surface(
-                        color = Color.Red,
-                        shape = CircleShape,
-                        modifier = Modifier
-                            .size(10.dp)
-                            .padding(2.dp)
-                            .align(Alignment.TopEnd)
-                            .border(1.dp, White, CircleShape)
-                    ) {}
+                            .weight(0.75f)
+                            .fillMaxHeight()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp)
+                    ) {
+                        HomeBodyContent(uiState)
+                    }
                 }
-            }
-        },
-        bottomBar = { NavigationBottomBar(navController, currentRoute) }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .background(White)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
-        ) {
-            // 👨‍👩‍👧‍👦 Sección hijos con scroll horizontal
-            if (uiState.userData?.role == 4) {
-                SectionChildren(
-                    children = childrenList,
-                    selectedId = selectedChildId,
-                    onChildSelected = { child ->
-                        selectedChildId = child.id
-                        viewModel.onChildSelected(child)
-                    })
+            } else {
+                Column(
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()
+                        .background(White)
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp)
+                ) {
+                    // 👨‍👩‍👧‍👦 Sección hijos con scroll horizontal (Solo en portrait)
+                    if (uiState.userData?.role == 4) {
+                        SectionChildren(
+                            children = childrenList,
+                            selectedId = selectedChildId,
+                            onChildSelected = { child ->
+                                selectedChildId = child.id
+                                viewModel.onChildSelected(child)
+                            })
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                if (uiState.asistencia != null) {
-                    // 🕒 Sección Asistencia
-                    val parser = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-                    val localeEs = Locale.forLanguageTag("es-ES")
-                    val formatter = SimpleDateFormat("EEEE, dd MMMM yyyy", localeEs)
-                    val fechaUs = parser.parse(uiState.asistencia!!.fecha) ?: ""
-                    val fechaEs = formatter.format(fechaUs)
-                    val fecha = fechaEs.split(" ").joinToString(" ") { palabra ->
-                        if (palabra.length > 3) {
-                            palabra.replaceFirstChar { it.uppercase() }
-                        } else {
-                            palabra
-                        }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
 
-                    SectionAttendace(
-                        AsistenciaDto(
-                            estado = uiState.asistencia!!.estado ?: "P",
-                            fecha = fecha,
-                            hora_inicio = uiState.asistencia!!.horing ?: "-",
-                            hora_fin = uiState.asistencia!!.horsal ?: "-"
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
+                    HomeBodyContent(uiState)
                 }
+            }
+        }
+    }
+}
 
-
-                // 📊 Sección botones (Notas, Incidencias, Asistencia) con scroll horizontal
-                SectionMenu()
-
-                Spacer(modifier = Modifier.height(16.dp))
-
+@Composable
+fun HomeBodyContent(uiState: HomeUiState) {
+    if (uiState.userData?.role == 4) {
+        if (uiState.asistencia != null) {
+            // 🕒 Sección Asistencia
+            val parser = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+            val localeEs = Locale.forLanguageTag("es-ES")
+            val formatter = SimpleDateFormat("EEEE, dd MMMM yyyy", localeEs)
+            val fechaUs = parser.parse(uiState.asistencia!!.fecha) ?: ""
+            val fechaEs = formatter.format(fechaUs)
+            val fecha = fechaEs.split(" ").joinToString(" ") { palabra ->
+                if (palabra.length > 3) {
+                    palabra.replaceFirstChar { it.uppercase() }
+                } else {
+                    palabra
+                }
             }
 
-            // 📌 Sección Comunicados con scroll horizontal
-            SectionCommunication(
-                listOf(
-                    CommunicationDto(
-                        "Reunión de padres",
-                        ImageVector.vectorResource(R.drawable.ic_volume)
-                    ),
-                    CommunicationDto(
-                        "Libretas 2do bimestre",
-                        ImageVector.vectorResource(R.drawable.ic_document)
-                    ),
-                    CommunicationDto(
-                        "Cierre de bimestre",
-                        ImageVector.vectorResource(R.drawable.ic_calendar_star)
-                    )
+            SectionAttendace(
+                AsistenciaDto(
+                    estado = uiState.asistencia!!.estado ?: "P",
+                    fecha = fecha,
+                    hora_inicio = uiState.asistencia!!.horing ?: "-",
+                    hora_fin = uiState.asistencia!!.horsal ?: "-"
                 )
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // 📊 Sección botones (Notas, Incidencias, Asistencia) con scroll horizontal
+        SectionMenu()
+
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+
+    // 📌 Sección Comunicados con scroll horizontal
+    SectionCommunication(
+        listOf(
+            CommunicationDto(
+                "Reunión de padres",
+                ImageVector.vectorResource(R.drawable.ic_volume)
+            ),
+            CommunicationDto(
+                "Libretas 2do bimestre",
+                ImageVector.vectorResource(R.drawable.ic_document)
+            ),
+            CommunicationDto(
+                "Cierre de bimestre",
+                ImageVector.vectorResource(R.drawable.ic_calendar_star)
+            )
+        )
+    )
+}
+
+
+@Composable
+fun TopBarContent(uiState: HomeUiState) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(R.drawable.logo_complete),
+            contentDescription = "Logo",
+            modifier = Modifier.size(50.dp)
+        )
+
+        Row(
+            modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Surface(
+                modifier = Modifier.size(25.dp),
+                shape = CircleShape,
+                color = colorResource(R.color.third)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = uiState.userData?.username?.split(" ")
+                            ?.filter { it.isNotEmpty() }
+                            ?.map { it.first() }
+                            ?.joinToString("") ?: "",
+                        color = colorResource(R.color.secondary),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 10.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = "¡Hola, ${uiState.userData?.username}!",
+                color = White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                lineHeight = 14.sp,
+                textAlign = TextAlign.Center
+
+            )
+        }
+
+        Box {
+            Surface(
+                modifier = Modifier.size(20.dp),
+                shape = CircleShape,
+                color = colorResource(R.color.fourth)
+            ) {}
+            Icon(
+                imageVector = Icons.Outlined.Notifications,
+                contentDescription = "Notificaciones",
+                tint = White,
+                modifier = Modifier
+                    .size(20.dp)
+                    .padding(2.dp),
+            )
+            Surface(
+                color = Color.Red,
+                shape = CircleShape,
+                modifier = Modifier
+                    .size(10.dp)
+                    .padding(2.dp)
+                    .align(Alignment.TopEnd)
+                    .border(1.dp, White, CircleShape)
+            ) {}
         }
     }
 }
@@ -261,23 +328,41 @@ fun HomeScreen(navController: NavController) {
 fun SectionChildren(
     children: List<ChildrenDto>,
     selectedId: Int,
+    isVertical: Boolean = false,
     onChildSelected: (ChildrenDto) -> Unit
 ) {
-    Text(
-        "Seleccionar hijo(a)",
-        style = MaterialTheme.typography.titleSmall,
-        color = colorResource(
-            R.color.text_primary
-        ), fontWeight = FontWeight.Normal
-    )
-    LazyRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(children) { child ->
-            val isSelected = child.id == selectedId
-            Box(modifier = Modifier.clickable { onChildSelected(child) }) {
-                ChildrenCard(child, isSelected)
+    Column {
+        Text(
+            "Seleccionar hijo(a)",
+            style = MaterialTheme.typography.titleMedium,
+            color = colorResource(
+                R.color.secondary
+            ), fontWeight = FontWeight.Bold
+        )
+        if (isVertical) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                children.forEach { child ->
+                    val isSelected = child.id == selectedId
+                    Box(modifier = Modifier.clickable { onChildSelected(child) }) {
+                        ChildrenCard(child, isSelected)
+                    }
+                }
+            }
+        } else {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(children) { child ->
+                    val isSelected = child.id == selectedId
+                    Box(modifier = Modifier.clickable { onChildSelected(child) }) {
+                        ChildrenCard(child, isSelected)
+                    }
+                }
             }
         }
     }
@@ -285,18 +370,20 @@ fun SectionChildren(
 
 @Composable
 fun SectionAttendace(asistenciaDto: AsistenciaDto) {
-    Text(
-        "Asistencia", style = MaterialTheme.typography.titleMedium, color = colorResource(
-            R.color.secondary
-        ), fontWeight = FontWeight.Bold
-    )
-    when (asistenciaDto.estado) {
-        "P" -> AttendancePresent(asistenciaDto)
-        "TI" -> AttendanceDelay(asistenciaDto)
-        "TJ" -> AttendanceDelay(asistenciaDto)
-        "FI" -> NonAttendance(asistenciaDto)
-        "FJ" -> NonAttendance(asistenciaDto)
-        else -> WithoutAttendance(asistenciaDto)
+    Column {
+        Text(
+            "Asistencia", style = MaterialTheme.typography.titleMedium, color = colorResource(
+                R.color.secondary
+            ), fontWeight = FontWeight.Bold
+        )
+        when (asistenciaDto.estado) {
+            "P" -> AttendancePresent(asistenciaDto)
+            "TI" -> AttendanceDelay(asistenciaDto)
+            "TJ" -> AttendanceDelay(asistenciaDto)
+            "FI" -> NonAttendance(asistenciaDto)
+            "FJ" -> NonAttendance(asistenciaDto)
+            else -> WithoutAttendance(asistenciaDto)
+        }
     }
 }
 
@@ -316,20 +403,15 @@ fun SectionMenu() {
         modifier = Modifier
             .fillMaxWidth()
             .background(White)
-            .padding(bottom = 16.dp)
     ) {
         HorizontalPager(
             state = pagerState,
-//            contentPadding = PaddingValues(horizontal = 8.dp),
-//            pageSpacing = 16.dp,
-//            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) { pageIndex ->
             // Cada página ahora es una fila con sus elementos
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
-//                    .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 pagedList[pageIndex].forEach { option ->
@@ -352,7 +434,7 @@ fun SectionMenu() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
+                .padding(top = 16.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {

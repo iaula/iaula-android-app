@@ -4,6 +4,7 @@ import com.aurelio.baldor.core.data.local.AuthPreferences
 import com.aurelio.baldor.core.data.remote.AuthApiService
 import com.aurelio.baldor.core.data.remote.AuthResponse
 import com.aurelio.baldor.core.data.remote.InstitutionResponse
+import com.aurelio.baldor.core.data.remote.VersionResponse
 import com.aurelio.baldor.core.data.remote.LoginRequest
 import com.aurelio.baldor.core.data.middleware.NetworkResult
 import com.aurelio.baldor.core.data.middleware.safeApiCall

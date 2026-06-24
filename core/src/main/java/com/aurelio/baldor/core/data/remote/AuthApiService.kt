@@ -10,6 +10,7 @@ data class LoginRequest(val usuario: String, val password: String)
 data class RefreshRequest(val refresh_token: String?)
 data class AuthResponse(val token_type: String, val refresh_token: String, val access_token: String, val user_data: UserData)
 data class InstitutionResponse(val codigo: String, val nombre: String, val api_url: String, val api_prefix: String, val logo_url: String)
+data class VersionResponse(val version_code: Int, val force_update: Boolean)
 
 interface AuthApiService {
 

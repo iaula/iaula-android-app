@@ -51,6 +51,5 @@ fun AppNavigation() {
         }
         composable("notas") { /* Pantalla de Notas */ }
         composable("agenda") { /* Pantalla de Agenda */ }
-        composable("menu") { /* Pantalla de Menú */ }
     }
 }
